@@ -1,0 +1,23 @@
+---
+
+#- hosts: all
+#  roles:
+#    - common
+#    - sshd
+#    - firewalld
+
+#- hosts: webservers
+#  roles:
+#    - apache
+
+- hosts: testweb1
+  roles:
+    - apache
+
+- hosts: testweb2
+  roles:
+    - apache
+
+- hosts: wlb
+  roles:
+    - haproxy

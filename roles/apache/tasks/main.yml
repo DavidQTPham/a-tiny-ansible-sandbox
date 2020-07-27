@@ -1,0 +1,46 @@
+---
+## Installing apache
+- name: install apache
+  yum:
+    name: httpd
+    state: latest
+
+- name: Turn off the  default welcome page
+  copy:
+    src: /etc/ansible/roles/apache/templates/welcome.conf.j2
+    dest: /etc/httpd/conf.d/welcome.conf
+    owner: root
+    group: root
+    mode: u=rw,g=rw,o=r
+
+- name: Use our own default web page
+  copy:
+    src: /etc/ansible/roles/apache/templates/index.html.j2
+    dest: /var/www/html/index.html
+    owner: root
+    group: root
+    mode: u=rw,g+rw,o=r
+
+- name: enable httpd
+  service:
+    name: httpd
+    enabled: yes
+  notify:
+  - restart apache
+
+- name: enable port 80
+  firewalld:
+    service: http
+    permanent: yes
+    state: enabled
+
+- name: enable port 443
+  firewalld:
+    service: https
+    permanent: yes
+    state: enabled
+
+- name: reload service firewalld
+  systemd:
+    name: firewalld
+    state: reloaded

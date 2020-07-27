@@ -1,0 +1,45 @@
+---
+
+- name: enable port 80
+  firewalld:
+    service: http
+    permanent: yes
+    state: enabled
+
+- name: reload service firewalld
+  systemd:
+    name: firewalld
+    state: reloaded
+
+- name: Install HAProxy
+  yum:
+    name: haproxy
+    state: installed
+
+- name: Configure haproxy for SELinux and HTTP
+  copy:
+    src: /etc/ansible/roles/haproxy/templates/haproxy-http.xml.j2
+    dest: /etc/firewalld/services/haproxy-http.xml
+    owner: root
+    group: root
+    mode: '640'
+
+- name: Apply SElinux context for the haproxy-http.xml file
+  command: restorecon  /etc/firewalld/services/haproxy-http.xml
+
+- name: Move the custom haproxy.cfg to the right place
+  copy:
+    src: /etc/ansible/roles/haproxy/templates/haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: '640' 
+  notify:
+  - restart haproxy
+
+- name: Enable haproxy
+  service:
+    name: haproxy
+    enabled: yes
+
+# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/load_balancer_administration/install_haproxy_example1

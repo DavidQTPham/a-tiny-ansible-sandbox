@@ -1,0 +1,13 @@
+frontend http_web *:80
+    mode http
+    default_backend rgw
+
+#frontend rgw­-https
+#  bind <insert vip ipv4>:443 ssl crt /etc/ssl/private/example.com.pem
+#  default_backend rgw
+
+backend rgw
+    balance roundrobin
+    mode http
+    server  webserver1 192.168.200.40:80 check
+    server  webserver2 192.168.200.41:80 check
