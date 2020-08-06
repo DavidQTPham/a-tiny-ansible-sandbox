@@ -1,0 +1,16 @@
+# Should you want to use my roles to play with ansible, you need to run the selfsign crt and key, then copy them over to your roles
+
+Go to the generic webserver box that you just created
+	mkdir /etc/ssl/private
+	chmod 700 /etc/ssl/private
+	openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/webserver1.key -out /etc/ssl/certs/webserver1.crt
+
+Answer all of the questions then you will have the files at those two locations: /etc/ssl/private/ and /etc/ssl/certs/
+then copy over to your ansible server/ controller.  If you use mine, then I placed the ssl key and crt files (generic, self-signed in these directories)
+	roles/webserver1/files/webserver1.key 
+	roles/webserver2/files/webserver2.key 
+	roles/webserver1/files/webserver1.crt 
+	roles/webserver2/files/webserver2.crt 
+
+Just remember that you should be able to scp from the ansible controller box to your generic webbox - if you could not, then your ansible playbook would not run anyway
+See the ssh-keyless authetication approach
