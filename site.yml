@@ -1,8 +1,8 @@
 ---
 
-#- hosts: all
-#  roles:
-#    - common
+- hosts: all
+  roles:
+    - common
 #    - sshd
 #    - firewalld
 
@@ -13,10 +13,12 @@
 - hosts: testweb1
   roles:
     - apache
+    - webserver1
 
 - hosts: testweb2
   roles:
     - apache
+    - webserver2
 
 - hosts: wlb
   roles:

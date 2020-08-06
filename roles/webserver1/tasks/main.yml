@@ -1,0 +1,41 @@
+---
+# tasks specific to webserver1 only
+
+- name: copy webserver1.key to /etc/ssl/private/
+  copy:
+    src: /etc/ansible/roles/webserver1/files/webserver1.key
+    dest: /etc/ssl/private/webserver1.key
+    owner: root
+    group: root
+    mode: u=rwx
+
+- name: copy webserver1.crt to /etc/ssl/certs/
+  copy:
+    src: /etc/ansible/roles/webserver1/files/webserver1.crt
+    dest: /etc/ssl/certs/webserver1.crt
+    owner: root
+    group: root
+    mode: u=rwx
+
+- name: copy ssl.conf to /etc/httpd/conf.d/ssl.conf
+  copy:
+    src: /etc/ansible/roles/webserver1/templates/ssl.conf.j2
+    dest: /etc/httpd/conf.d/ssl.conf
+    owner: root
+    group: root
+    mode: u=rwx
+
+- name: modify the proper name for the servername in the httpd.conf file
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^\s*ServerName webserverxxx.tofumars.com:80'
+    line: ServerName {{ ansible_hostname }}.tofumars.com:80
+    owner: root
+    group: root
+    mode: u=rw,g=rw,o=r
+
+- name: restart httpd
+  service:
+    name: httpd
+    state: restarted
+

@@ -1,0 +1,17 @@
+---
+## Stuff that we want all systems to have
+
+- name: Install tree command
+  yum:
+    name: tree
+    state: present
+
+- name: Install net-tools
+  yum:
+    name: net-tools
+    state: present
+
+- name: Install semanage
+  yum:
+    name: policycoreutils-python
+    state: present 

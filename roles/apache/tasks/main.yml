@@ -5,6 +5,11 @@
     name: httpd
     state: latest
 
+- name: Install mod_ssl
+  yum:
+    name: mod_ssl
+    state: present
+
 - name: Turn off the  default welcome page
   copy:
     src: /etc/ansible/roles/apache/templates/welcome.conf.j2
@@ -13,13 +18,62 @@
     group: root
     mode: u=rw,g=rw,o=r
 
-- name: Use our own default web page
-  copy:
-    src: /etc/ansible/roles/apache/templates/index.html.j2
-    dest: /var/www/html/index.html
+- name: Create a default web folder for port 80
+  file:
+    path: /var/www/html/site80
+    state: directory
     owner: root
     group: root
-    mode: u=rw,g+rw,o=r
+    mode: u=rwx,g=rx,o=rx
+
+- name: Create a default web folder for port 443
+  file:
+    path: /var/www/html/site443
+    state: directory
+    owner: root
+    group: root
+    mode: u=rw,g=rx,o=rx
+
+- name: Set SELinux permission for those folders
+  command: semanage fcontext -a -t httpd_sys_content_t "/var/www/html(/.*)?"
+
+- name: run restorecon command on site80
+  command: restorecon -Rv /var/www/html/site80
+
+- name: run restorecon command on site443
+  command: restorecon -Rv /var/www/html/site443
+
+- name: Create a private ssl folder
+  file:
+    path: /etc/ssl/private
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g-rwx,o-rwx
+
+- name: Use our own default web page for port 80
+  copy:
+    src: /etc/ansible/roles/apache/templates/index.html.j2
+    dest: /var/www/html/site80/index.html
+    owner: root
+    group: root
+    mode: u=rw,g=rx,o=rx
+
+- name: Use our default web page for port 443
+  copy:
+    src: /etc/ansible/roles/apache/templates/index.html.j2
+    dest: /var/www/html/site443/index.html
+    owner: root
+    group: root
+    mode: u=rw,g=rx,o=rx
+
+- name: Copy customized httpd.conf over
+  copy:
+    src: /etc/ansible/roles/apache/templates/httpd.conf.j2
+    dest: /etc/httpd/conf/httpd.conf
+    owner: root
+    group: root
+    mode: u=rw,g=rw,o=r
 
 - name: enable httpd
   service:
@@ -44,3 +98,24 @@
   systemd:
     name: firewalld
     state: reloaded
+
+- name: Replace the default webpage H1 with the appropriate webserver name
+  lineinfile:
+    path: /var/www/html/site80/index.html
+    regexp: '^\s*<H1> The default webpage </H1>'
+    line: '<H1> The default webpage for server {{ ansible_hostname }} !!</H1>'
+    owner: root
+    group: root
+    mode: u=rw,g=rx,o=rx
+
+- name: Replace the default webpage H1 with the appropriate webserver name
+  lineinfile:
+    path: /var/www/html/site443/index.html
+    regexp: '^\s*<H1> The default webpage </H1>'
+    line: '<H1> The default secure webpage for server {{ ansible_hostname }} !!</H1>'
+    owner: root
+    group: root
+    mode: u=rw,g=rx,o=rx
+
+
+## https://github.com/bertvv/ansible-role-httpd/blob/master/vars/RedHat.yml
