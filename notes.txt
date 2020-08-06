@@ -14,3 +14,5 @@ then copy over to your ansible server/ controller.  If you use mine, then I plac
 
 Just remember that you should be able to scp from the ansible controller box to your generic webbox - if you could not, then your ansible playbook would not run anyway
 See the ssh-keyless authetication approach
+
+## Default settings on group_vars all, ansible.cfg, etc are used for learning and practicing in a safe and private subnet only. Do modify them to hide your secrets, and harden the security using appropriate ansible and os tools 
